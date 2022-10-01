@@ -11,12 +11,6 @@ upper_blue = np.array([185, 170, 255])
 
 
 def masking(img, lower_hsv, upper_hsv):
-    # histogram equalisation
-    temp = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
-    # equalize the histogram of the Y channel
-    temp[:, :, 0] = cv2.equalizeHist(temp[:, :, 0])
-    # convert the YUV image back to RGB format
-    img = cv2.cvtColor(temp, cv2.COLOR_YUV2BGR)
 
     # creating mask
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
