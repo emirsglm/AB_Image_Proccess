@@ -189,4 +189,4 @@ if __name__ == '__main__':
     sys.exit(main(sys.argv))
 
 
-#python3 video.py -i /golet_3.mp4, -c /zort_yolov4.cfg, -w /zort_yolov4_best.weights
+#python3 video.py -i golet_3.mp4 -c zort_yolov4.cfg -w zort_yolov4_best.weights
