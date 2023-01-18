@@ -106,6 +106,7 @@ def steer(img,lines):
     else:
         print("straight")
 
+    #burayı düzelt
 
 cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),244),(0,255,0),1)
 
