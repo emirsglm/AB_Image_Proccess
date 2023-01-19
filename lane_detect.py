@@ -6,12 +6,15 @@ import matplotlib.pyplot as plt
 path = "/Users/emirysaglam/Documents/GitHub/AB_Image_Proccess/calib/4.png"
 
 def canny(img,min_tresh,max_tresh):
+    
     lane_img = np.copy(img)
     lane_img = cv2.cvtColor(lane_img, cv2.COLOR_BGR2GRAY)
     #lane_img = cv2.GaussianBlur(lane_img, (3,3),0)
     #              lower tresh, upper tresh  ratio 1/2 or 1/3
     lane_img = cv2.Canny(lane_img,min_tresh,max_tresh)
     return lane_img
+
+
 
 #roi (224,224) --> base:(40,170) , height:(104,100)
 #left = 40
@@ -100,10 +103,18 @@ def steer(img,lines,tresh):
 
 img = cv2.imread(path)
 
-left = 270
+# bu uc parametre yolu icine alan ucgenin kose koordinatları
+# left ucgenin sol alt kosesinin x eksenindeki yeri
+# right ucgenin sag alt kosesinin x eksenindeki yeri
+# up ise yüksekliginin sirayla x , y koordinatindaki yerleri
+left = 270    
 right = 2400
 up = (1278,590)
+
+# tresh sağ sol outputu icin eşik degeri
 tresh = 200
+
+# miin_tresh max_tresh canny fonksiyonu için esik degerleri 1/2 ya da 1/3 oranında olmali
 min_tresh = 50
 max_tresh = 150
 
