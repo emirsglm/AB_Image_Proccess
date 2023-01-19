@@ -3,23 +3,29 @@ import cv2
 import matplotlib.pyplot as plt 
 
 
-path = "/Users/emirysaglam/Desktop/codes/ImageProccesing/codes/u_net/single_class/roadline_data/train_images/image_224(143).png"
+path = "/Users/emirysaglam/Documents/GitHub/AB_Image_Proccess/calib/1.png"
 
-def canny(img):
+def canny(img,min_tresh,max_tresh):
     lane_img = np.copy(img)
     lane_img = cv2.cvtColor(lane_img, cv2.COLOR_BGR2GRAY)
     #lane_img = cv2.GaussianBlur(lane_img, (3,3),0)
     #              lower tresh, upper tresh  ratio 1/2 or 1/3
-    lane_img = cv2.Canny(lane_img,300,600)
+    lane_img = cv2.Canny(lane_img,min_tresh,max_tresh)
     return lane_img
 
 #roi (224,224) --> base:(40,170) , height:(104,100)
-def roi(img):
+#left = 40
+#right = 170
+#up = ((104,100))
+#tresh = 10
+
+
+def roi(img,left,right,up):
     height = img.shape[0]
-    
+
     #define triangular roi  (left corner , right corner , height)
     polygons = np.array([
-        [(40,height),(170,height),(104,100)]
+        [(left,height),(right,height),up]
         ])
 
     mask = np.zeros_like(img)
@@ -45,7 +51,7 @@ def display_lines(img,lines):
 def make_coord(img,line_param):
     slope , intercept = line_param
     y1 = img.shape[0]
-    y2 = int(y1*(4/5))
+    y2 = int(y1*(3/5))
     x1 = int((y1 - intercept)/slope)
     x2 = int((y2 - intercept)/slope)
 
@@ -72,17 +78,17 @@ def ave_slope_intercept(img,lines):
 
     return np.array([left_line,right_line])
 
-def steer(img,lines):
+def steer(img,lines,tresh):
 
     lc_point = int((lines[0][0] + lines[0][2])/2) 
     rc_point = int((lines[1][0] + lines[1][2])/2)
     cc_point = int((lc_point+ rc_point)/2)
     frame_center = int(img.shape[1]/2)
 
-    if cc_point > frame_center + 10:
+    if cc_point > frame_center + tresh:
         print("steer left")
     
-    elif frame_center - 10 > cc_point:
+    elif tresh - 10 > cc_point:
         print("steer right")
 
     else:
@@ -90,16 +96,26 @@ def steer(img,lines):
 
     #burayı düzelt
 
+    return cc_point
 
+"""
 img = cv2.imread(path)
+
+left = 270
+right = 2400
+up = (1278,590)
+tresh = 200
+min_tresh = 150
+max_tresh = 300
+
 
 canny_img = canny(img)
 
-cropped = roi(canny_img)
+cropped = roi(canny_img,left,right,up)
 #roi ven canny nin sırasını değiştirmeyi dene
 
-lines = cv2.HoughLinesP(cropped, 2, np.pi/10, 10, np.array([]), minLineLength=10, maxLineGap=2)
-#print(lines)
+
+lines = cv2.HoughLinesP(cropped, 2, np.pi/180, 180, np.array([]), minLineLength=30, maxLineGap=5)
 
 averaged_lines = ave_slope_intercept(img,lines)
 print(averaged_lines)
@@ -108,12 +124,13 @@ lines_img = display_lines(img,averaged_lines)
 final_out = cv2.addWeighted(img, 0.8, lines_img, 1,1)
 
 
-cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),244),(0,255,0),1)
+cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),img.shape[0]),(0,255,0),1)
 
-steer(final_out,averaged_lines)
+steer(final_out,averaged_lines,tresh)
 cv2.imshow("final",final_out)
 cv2.imshow("canny",canny_img)
-cv2.waitKey(0)
+
+cv2.waitKey(0)"""
 
 
 
@@ -127,27 +144,36 @@ dim = (int(width * scale_percent / 100), int(height * scale_percent / 100))
 img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 """
 
-
 while True:
     ret,frame = cap.read()
     if not ret:
         break
-
-    canny_frame = canny(frame)
-    roi_frame = roi(canny_frame)
-
-    #parametreleri ayarla
-    lines = cv2.HoughLinesP(roi_frame, 2, np.pi/180, 180, np.array([]), minLineLength=30, maxLineGap=10)
     
+
+    left = 270
+    right = 2400
+    up = (1278,590)
+    tresh = 200
+    min_tresh = 150
+    max_tresh = 300
+    
+    #plt.imshow() lef,right ,up parametrelerini ayarla
+    #plt.show()
+
+    canny_img = canny(frame)
+    cropped = roi(canny_img,left,right,up)
+    #roi ven canny nin sırasını değiştirmeyi dene
+
+    lines = cv2.HoughLinesP(cropped, 2, np.pi/180, 180, np.array([]), minLineLength=30, maxLineGap=5)
+
     averaged_lines = ave_slope_intercept(frame,lines)
-    steer(frame,averaged_lines) #outputu bu veriyo
+    steer(frame,averaged_lines,tresh)
 
-    #display için
-    lines_frame = display_lines(frame,averaged_lines)
-    final_out = cv2.addWeighted(frame, 0.8, lines_frame, 1,1)   
-    cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),244),(0,255,0),1)
-    cv2.imshow("final", final_out)
-    cv2.waitKey(0)
+    #lines_img = display_lines(img,averaged_lines)
+    #cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),244),(0,255,0),1)
+    #final_out = cv2.addWeighted(img, 0.8, lines_img, 1,1)   
+    #cv2.imshow("final", final_out)
+    #cv2.waitKey(0)
 
 
-cv2.destroyAllWindows()
+#cv2.destroyAllWindows()
