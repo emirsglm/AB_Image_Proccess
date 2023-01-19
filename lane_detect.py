@@ -72,24 +72,6 @@ def ave_slope_intercept(img,lines):
 
     return np.array([left_line,right_line])
 
-
-
-img = cv2.imread(path)
-
-canny_img = canny(img)
-
-cropped = roi(canny_img)
-
-lines = cv2.HoughLinesP(cropped, 2, np.pi/10, 10, np.array([]), minLineLength=10, maxLineGap=2)
-#print(lines)
-
-averaged_lines = ave_slope_intercept(img,lines)
-print(averaged_lines)
-
-lines_img = display_lines(img,averaged_lines)
-final_out = cv2.addWeighted(img, 0.8, lines_img, 1,1)
-
-
 def steer(img,lines):
 
     lc_point = int((lines[0][0] + lines[0][2])/2) 
@@ -108,9 +90,64 @@ def steer(img,lines):
 
     #burayı düzelt
 
+
+img = cv2.imread(path)
+
+canny_img = canny(img)
+
+cropped = roi(canny_img)
+#roi ven canny nin sırasını değiştirmeyi dene
+
+lines = cv2.HoughLinesP(cropped, 2, np.pi/10, 10, np.array([]), minLineLength=10, maxLineGap=2)
+#print(lines)
+
+averaged_lines = ave_slope_intercept(img,lines)
+print(averaged_lines)
+
+lines_img = display_lines(img,averaged_lines)
+final_out = cv2.addWeighted(img, 0.8, lines_img, 1,1)
+
+
 cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),244),(0,255,0),1)
 
 steer(final_out,averaged_lines)
 cv2.imshow("final",final_out)
 cv2.imshow("canny",canny_img)
 cv2.waitKey(0)
+
+
+
+
+
+cap = cv2.VideoCapture(path)
+
+"""# resizing image for faster runtime
+scale_percent = 20
+dim = (int(width * scale_percent / 100), int(height * scale_percent / 100))
+img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+"""
+
+
+while True:
+    ret,frame = cap.read()
+    if not ret:
+        break
+
+    canny_frame = canny(frame)
+    roi_frame = roi(canny_frame)
+
+    #parametreleri ayarla
+    lines = cv2.HoughLinesP(roi_frame, 2, np.pi/180, 180, np.array([]), minLineLength=30, maxLineGap=10)
+    
+    averaged_lines = ave_slope_intercept(frame,lines)
+    steer(frame,averaged_lines) #outputu bu veriyo
+
+    #display için
+    lines_frame = display_lines(frame,averaged_lines)
+    final_out = cv2.addWeighted(frame, 0.8, lines_frame, 1,1)   
+    cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),244),(0,255,0),1)
+    cv2.imshow("final", final_out)
+    cv2.waitKey(0)
+
+
+cv2.destroyAllWindows()
