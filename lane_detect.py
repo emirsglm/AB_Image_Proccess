@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pyplot as plt 
 
 
-path = "/Users/emirysaglam/Documents/GitHub/AB_Image_Proccess/calib/4.png"
+path = "/Users/emirysaglam/Documents/GitHub/AB_Image_Proccess/calib/1.png"
 
 def canny(img,min_tresh,max_tresh):
     
@@ -54,7 +54,7 @@ def display_lines(img,lines):
 def make_coord(img,line_param):
     slope , intercept = line_param
     y1 = img.shape[0]
-    y2 = int(y1*(3/5))
+    y2 = int(y1*(4/5))
     x1 = int((y1 - intercept)/slope)
     x2 = int((y2 - intercept)/slope)
 
@@ -102,21 +102,23 @@ def steer(img,lines,tresh):
 
 
 img = cv2.imread(path)
+img = cv2.resize(img, (1280,720), interpolation=cv2.INTER_AREA)
+
 
 # bu uc parametre yolu icine alan ucgenin kose koordinatları
 # left ucgenin sol alt kosesinin x eksenindeki yeri
 # right ucgenin sag alt kosesinin x eksenindeki yeri
 # up ise yüksekliginin sirayla x , y koordinatindaki yerleri
-left = 270    
-right = 2400
-up = (1278,590)
+left = 130    
+right = 1140
+up = (600,280)
 
 # tresh sağ sol outputu icin eşik degeri
-tresh = 200
+tresh = 50
 
 # miin_tresh max_tresh canny fonksiyonu için esik degerleri 1/2 ya da 1/3 oranında olmali
-min_tresh = 50
-max_tresh = 150
+min_tresh = 70
+max_tresh = 140
 
 
 canny_img = canny(img,min_tresh,max_tresh)
@@ -126,7 +128,7 @@ cropped = roi(canny_img,left,right,up)
 #roi ven canny nin sırasını değiştirmeyi dene
 cv2.imshow("cropped",cropped)
 
-lines = cv2.HoughLinesP(cropped, 2, np.pi/180, 180, np.array([]), minLineLength=30, maxLineGap=5)
+lines = cv2.HoughLinesP(cropped, 2, np.pi/180, 180, np.array([]), minLineLength=30, maxLineGap=10)
 
 averaged_lines = ave_slope_intercept(img,lines)
 print(averaged_lines)
@@ -138,9 +140,8 @@ final_out = cv2.addWeighted(img, 0.8, lines_img, 1,1)
 cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),img.shape[0]),(0,255,0),1)
 
 steer(final_out,averaged_lines,tresh)
+
 cv2.imshow("final",final_out)
-
-
 cv2.waitKey(0)
 
 
