@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pyplot as plt 
 
 
-path = "/Users/emirysaglam/Documents/GitHub/AB_Image_Proccess/calib/1.png"
+path = "/Users/emirysaglam/Documents/GitHub/AB_Image_Proccess/calib/4.png"
 
 def canny(img,min_tresh,max_tresh):
     lane_img = np.copy(img)
@@ -60,7 +60,6 @@ def make_coord(img,line_param):
 def ave_slope_intercept(img,lines):
     left_fit = []
     right_fit =[]
-
     for line in lines:
         x1,y1,x2,y2 = line.reshape(4)
         param = np.polyfit((x1,x2),(y1,y2),1)
@@ -98,22 +97,23 @@ def steer(img,lines,tresh):
 
     return cc_point
 
-"""
+
 img = cv2.imread(path)
 
 left = 270
 right = 2400
 up = (1278,590)
 tresh = 200
-min_tresh = 150
-max_tresh = 300
+min_tresh = 50
+max_tresh = 150
 
 
-canny_img = canny(img)
+canny_img = canny(img,min_tresh,max_tresh)
+cv2.imshow("canny",canny_img)
 
 cropped = roi(canny_img,left,right,up)
 #roi ven canny nin sırasını değiştirmeyi dene
-
+cv2.imshow("cropped",cropped)
 
 lines = cv2.HoughLinesP(cropped, 2, np.pi/180, 180, np.array([]), minLineLength=30, maxLineGap=5)
 
@@ -128,22 +128,22 @@ cv2.line(final_out, (int(img.shape[1]/2),0),(int(img.shape[1]/2),img.shape[0]),(
 
 steer(final_out,averaged_lines,tresh)
 cv2.imshow("final",final_out)
-cv2.imshow("canny",canny_img)
-
-cv2.waitKey(0)"""
 
 
+cv2.waitKey(0)
 
 
 
-cap = cv2.VideoCapture(path)
+
+
+#cap = cv2.VideoCapture(path)
 
 """# resizing image for faster runtime
 scale_percent = 20
 dim = (int(width * scale_percent / 100), int(height * scale_percent / 100))
 img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 """
-
+"""
 while True:
     ret,frame = cap.read()
     if not ret:
@@ -177,3 +177,4 @@ while True:
 
 
 #cv2.destroyAllWindows()
+"""
